@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargaloc - Sistema de Controle de Pneus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Corporate Teal & Slate -->
+    <!-- Application Structure Plan: A thematic, single-page application designed for a persuasive user flow. It starts with the problem, introduces the solution, provides an interactive section for users to select their specific scenario (which dynamically shows applicable solutions), visually details the benefits, offers a clear chart-based comparison of the two operational modes, and ends with a strong call to action. This structure was chosen to guide the user from understanding their need to seeing how Cargaloc specifically solves it, making the product offering much clearer and more personal than a static presentation. -->
+    <!-- Visualization & Content Choices: 
+        - The Challenge (Slide 1): Goal: Inform/Impact. Method: Icon-driven cards for quick visual association with key problems (cost, theft).
+        - The Solution (Slide 2): Goal: Organize. Method: A simple HTML/CSS flexbox diagram to visualize the system components (Tag -> Transmitter -> Tracker).
+        - How it Works (Slides 3 & 4): Goal: Compare/Engage. Method: An interactive component with buttons for each of the 3 scenarios. Clicking a button uses JavaScript to dynamically display the available modes (Alarme/Telemetria) and their descriptions for that specific scenario. This is the core interactive element.
+        - Benefits (Slide 5): Goal: Inform. Method: A responsive grid of cards, each highlighting a key benefit (Economia, Integração, Flexibilidade, ROI) with an icon.
+        - Comparison Chart (New Viz): Goal: Compare. Method: A horizontal bar chart using Chart.js to visually compare "Modo Alarme" vs. "Modo Telemetria" on criteria like Data Detail, Cost, and Complexity. This provides an at-a- glance understanding of the trade-offs.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .section-title {
+            color: #1e293b; /* slate-800 */
+        }
+        .section-subtitle {
+            color: #475569; /* slate-600 */
+        }
+        .btn-primary {
+            background-color: #0e7490; /* cyan-700 */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #155e75; /* cyan-800 */
+        }
+        .btn-secondary {
+            background-color: #f1f5f9; /* slate-100 */
+            color: #0e7490; /* cyan-700 */
+            border: 1px solid #0e7490;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-secondary.active {
+            background-color: #0e7490; /* cyan-700 */
+            color: white;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-slate-800">
+                Cargaloc
+            </div>
+            <div>
+                <a href="#contato" class="btn-primary font-semibold px-5 py-2 rounded-lg">Contato</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold section-title mb-4">Sistema de Controle de Pneus Cargaloc</h1>
+                <p class="text-lg md:text-xl section-subtitle max-w-3xl mx-auto mb-8">Segurança e eficiência para sua frota. Proteja seu maior ativo contra roubos e trocas indevidas.</p>
+                <a href="#solucao" class="btn-primary font-semibold px-8 py-3 rounded-lg text-lg">Conheça a Solução</a>
+            </div>
+        </section>
+
+        <section id="desafio" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">O Desafio dos Pneus na Linha Pesada</h2>
+                    <p class="section-subtitle mt-2 max-w-2xl mx-auto">Entenda os problemas que impactam diretamente sua operação e seus lucros.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card p-8 text-center">
+                        <div class="text-5xl mb-4">💰</div>
+                        <h3 class="text-xl font-semibold section-title mb-2">Custo Operacional</h3>
+                        <p>Pneus representam um dos custos mais significativos para frotas, e perdas inesperadas impactam diretamente seu orçamento.</p>
+                    </div>
+                    <div class="card p-8 text-center">
+                        <div class="text-5xl mb-4">🔄</div>
+                        <h3 class="text-xl font-semibold section-title mb-2">Roubo e Troca Indevida</h3>
+                        <p>A troca não autorizada e o furto de pneus são vilões silenciosos que geram prejuízos diretos e constantes.</p>
+                    </div>
+                    <div class="card p-8 text-center">
+                        <div class="text-5xl mb-4">📉</div>
+                        <h3 class="text-xl font-semibold section-title mb-2">Perdas Financeiras</h3>
+                        <p>A falta de um controle eficaz resulta em perdas financeiras e operacionais que poderiam ser evitadas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solucao" class="py-16 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">Nossa Solução: Controle Inteligente de Pneus</h2>
+                    <p class="section-subtitle mt-2 max-w-2xl mx-auto">Projetado para prevenir roubos e trocas, garantindo a proteção do seu patrimônio.</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-semibold section-title text-center mb-6">Componentes Básicos do Sistema</h3>
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                            <div class="text-center">
+                                <div class="bg-cyan-100 text-cyan-800 rounded-full h-24 w-24 flex items-center justify-center text-4xl mx-auto">🏷️</div>
+                                <p class="font-semibold mt-4">Tags nos Pneus</p>
+                                <p class="text-sm text-slate-500">Identificação única</p>
+                            </div>
+                            <div class="text-cyan-500 text-2xl font-mono hidden md:block">&gt;&gt;</div>
+                             <div class="text-cyan-500 text-2xl font-mono md:hidden rotate-90 my-2">&gt;&gt;</div>
+                            <div class="text-center">
+                                <div class="bg-cyan-100 text-cyan-800 rounded-full h-24 w-24 flex items-center justify-center text-4xl mx-auto">📡</div>
+                                <p class="font-semibold mt-4">Transmissor Veicular</p>
+                                <p class="text-sm text-slate-500">Comunica com as tags</p>
+                            </div>
+                            <div class="text-cyan-500 text-2xl font-mono hidden md:block">&gt;&gt;</div>
+                            <div class="text-cyan-500 text-2xl font-mono md:hidden rotate-90 my-2">&gt;&gt;</div>
+                            <div class="text-center">
+                                <div class="bg-cyan-100 text-cyan-800 rounded-full h-24 w-24 flex items-center justify-center text-4xl mx-auto">🛰️</div>
+                                <p class="font-semibold mt-4">Seu Rastreador</p>
+                                <p class="text-sm text-slate-500">Recebe os dados</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <h4 class="text-xl font-semibold section-title">Propósito Central</h4>
+                            <p class="section-subtitle mt-2">Proteger seu investimento, reduzir perdas e otimizar seu custo operacional.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="como-funciona" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">Como Funciona?</h2>
+                    <p class="section-subtitle mt-2 max-w-2xl mx-auto">Selecione seu cenário atual para ver as soluções disponíveis para você.</p>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4 mb-8" id="scenario-selector">
+                    <button class="btn-secondary px-5 py-2 rounded-lg font-semibold active" data-scenario="1">Não tenho rastreador</button>
+                    <button class="btn-secondary px-5 py-2 rounded-lg font-semibold" data-scenario="2">Tenho rastreador (sem serial)</button>
+                    <button class="btn-secondary px-5 py-2 rounded-lg font-semibold" data-scenario="3">Tenho rastreador (com serial)</button>
+                </div>
+
+                <div id="scenarios-content">
+                    <div id="scenario-1">
+                        <p class="text-center section-subtitle mb-8">A Cargaloc fornece todo o hardware necessário. Você escolhe o modo de operação ideal.</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="card p-6">
+                                <h4 class="font-bold text-xl text-cyan-700 mb-2">Modo Alarme</h4>
+                                <p class="font-semibold">O que faz?</p>
+                                <p class="mb-4">Envia ao rastreador apenas se o pneu está presente ou ausente.</p>
+                                <p class="font-semibold">Alerta:</p>
+                                <p>Sua plataforma de rastreamento dispara o alarme.</p>
+                            </div>
+                            <div class="card p-6">
+                                <h4 class="font-bold text-xl text-cyan-700 mb-2">Modo Telemetria</h4>
+                                <p class="font-semibold">O que faz?</p>
+                                <p class="mb-4">Envia dados detalhados sobre o pneu (ID, posição, tipo, etc.).</p>
+                                <p class="font-semibold">Controle:</p>
+                                <p>Nossa plataforma dedicada Cargaloc gerencia e analisa os dados.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="scenario-2" class="hidden">
+                             <p class="text-center section-subtitle mb-8">Com seu rastreador atual, você opera no Modo Alarme. Para telemetria, podemos estudar uma solução alternativa.</p>
+                        <div class="grid md:grid-cols-1 gap-8 max-w-lg mx-auto">
+                            <div class="card p-6">
+                                <h4 class="font-bold text-xl text-cyan-700 mb-2">Modo Alarme (Disponível)</h4>
+                                <p class="font-semibold">O que faz?</p>
+                                <p class="mb-4">Envia ao rastreador apenas se o pneu está presente ou ausente.</p>
+                                <p class="font-semibold">Alerta:</p>
+                                <p>Sua plataforma de rastreamento dispara o alarme.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="scenario-3" class="hidden">
+                             <p class="text-center section-subtitle mb-8">Seu rastreador é compatível com ambos os modos. A escolha é sua.</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="card p-6">
+                                <h4 class="font-bold text-xl text-cyan-700 mb-2">Modo Alarme</h4>
+                                <p class="font-semibold">O que faz?</p>
+                                <p class="mb-4">Envia ao rastreador apenas se o pneu está presente ou ausente.</p>
+                                <p class="font-semibold">Alerta:</p>
+                                <p>Sua plataforma de rastreamento dispara o alarme.</p>
+                            </div>
+                            <div class="card p-6">
+                                <h4 class="font-bold text-xl text-cyan-700 mb-2">Modo Telemetria</h4>
+                                <p class="font-semibold">O que faz?</p>
+                                <p class="mb-4">Envia dados detalhados sobre o pneu (ID, posição, tipo, etc.).</p>
+                                <p class="font-semibold">Controle:</p>
+                                <p>Nossa plataforma dedicada Cargaloc gerencia e analisa os dados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparativo" class="py-16 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">Comparativo dos Modos</h2>
+                    <p class="section-subtitle mt-2 max-w-2xl mx-auto">Entenda rapidamente as principais diferenças entre os modos Alarme e Telemetria.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="beneficios" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold section-title">Benefícios Concretos para Sua Frota</h2>
+                    <p class="section-subtitle mt-2 max-w-2xl mx-auto">Nosso sistema entrega valor real, transformando seu controle de pneus.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card p-6">
+                        <h4 class="font-bold text-lg section-title mb-2">💸 Economia Direta</h4>
+                        <p>Previna roubos e desvios com alertas em tempo real, reduzindo gastos com reposição de pneus.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="font-bold text-lg section-title mb-2">🔗 Aproveitamento Inteligente</h4>
+                        <p>Integramos com seu rastreador existente, evitando duplicação de equipamentos e custos.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="font-bold text-lg section-title mb-2">🔧 Flexibilidade Operacional</h4>
+                        <p>Escolha o nível de controle ideal para sua necessidade e orçamento, do alerta básico ao detalhado.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="font-bold text-lg section-title mb-2">📈 Custo Otimizado e ROI</h4>
+                        <p>A prevenção de perdas gera economia imediata, garantindo um retorno sobre o investimento claro e rápido.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer id="contato" class="bg-slate-800 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-4">Pronto para otimizar a segurança da sua frota?</h2>
+            <p class="text-slate-300 max-w-2xl mx-auto mb-8">Entre em contato conosco para uma demonstração personalizada e descubra como a Cargaloc pode transformar a gestão dos pneus da sua frota.</p>
+            <a href="mailto:contato@cargaloc.com.br" class="bg-white text-cyan-800 font-semibold px-8 py-3 rounded-lg text-lg hover:bg-slate-200 transition">Fale Conosco</a>
+            <div class="mt-8 text-sm text-slate-400">
+                Cargaloc &copy; 2025. Inovação e Segurança para a Logística da Sua Frota.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scenarioSelector = document.getElementById('scenario-selector');
+            const scenarioButtons = scenarioSelector.querySelectorAll('button');
+            const scenariosContent = {
+                '1': document.getElementById('scenario-1'),
+                '2': document.getElementById('scenario-2'),
+                '3': document.getElementById('scenario-3'),
+            };
+
+            scenarioSelector.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const selectedScenario = e.target.dataset.scenario;
+                    
+                    scenarioButtons.forEach(button => {
+                        button.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+
+                    Object.values(scenariosContent).forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    scenariosContent[selectedScenario].classList.remove('hidden');
+                }
+            });
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Detalhe dos Dados', 'Complexidade de Gestão', 'Custo de Implantação', 'Prevenção de Roubo'],
+                    datasets: [{
+                        label: 'Modo Alarme',
+                        data: [1, 2, 2, 5],
+                        backgroundColor: 'rgba(100, 116, 139, 0.6)', // slate-500
+                        borderColor: 'rgba(100, 116, 139, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Modo Telemetria',
+                        data: [5, 4, 4, 5],
+                        backgroundColor: 'rgba(14, 116, 144, 0.6)', // cyan-700
+                        borderColor: 'rgba(14, 116, 144, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const labels = ['N/A', 'Baixo', 'Médio', 'Alto', 'Muito Alto', 'Máximo'];
+                                    return labels[value];
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.raw;
+                                    const labels = ['N/A', 'Baixo', 'Médio', 'Alto', 'Muito Alto', 'Máximo'];
+                                    label += labels[value];
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
